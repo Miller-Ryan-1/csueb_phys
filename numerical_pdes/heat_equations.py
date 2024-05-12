@@ -8,6 +8,256 @@ import matplotlib.pyplot as plt
 import time
 from IPython.display import display, clear_output
 
+def transport_1d(f_u_t_0, f_u_t_L, f_u_0_x,L,t_max,dx,dt,c):
+    # -- Calculated
+    Nx = int(L/dx) + 1
+    Nt = int(t_max/dt)
+
+    x_grid = np.linspace(0,L,Nx)
+    t_grid = np.linspace(0,t_max,Nt)
+
+    # -- Create solution data holder
+    U = []
+
+    # -- Append initial conditions (t = 0)
+    u_t_x_0 = []
+
+    for x in x_grid:
+        u_t_x_0.append(f_u_0_x(x))
+
+    u_t_x_0[0] = f_u_t_0(0)
+    u_t_x_0[-1] = f_u_t_L(0)
+
+    U.append(u_t_x_0)
+
+    for j in range(len(t_grid)):
+        u_t_x = []
+        
+        u_previous = U[-1]
+        
+        for m in range(1,len(x_grid)-1):
+            # Equation 5.14 (slightly modified) to calculate u at each x value:
+            #! - Note: can use classes or other methods to choose which function is used
+            u = transport_1D_explicit(u_previous,c,m,dt,dx)
+            # Append this value to the time step line
+            u_t_x.append(u)
+
+        # Append the first and last value with boundary conditions (0 in this case)
+        u_t_x.insert(0,f_u_t_0(j*dt))
+        u_t_x.append(f_u_t_L(j*dt))
+
+        # Now append the full solutions matrix
+        U.append(u_t_x) 
+
+def inviscid_burgers_1D(f_u_t_0, f_u_t_L, f_u_0_x,L,t_max,dx,dt):
+    # -- Calculated
+    Nx = int(L/dx) + 1
+    Nt = int(t_max/dt)
+
+    x_grid = np.linspace(0,L,Nx)
+    t_grid = np.linspace(0,t_max,Nt)
+
+    # -- Create solution data holder
+    U = []
+
+    # -- Append initial conditions (t = 0)
+    u_t_x_0 = []
+
+    for x in x_grid:
+        u_t_x_0.append(f_u_0_x(x))
+
+    u_t_x_0[0] = f_u_t_0(0)
+    u_t_x_0[-1] = f_u_t_L(0)
+
+    U.append(u_t_x_0)
+
+    for j in range(len(t_grid)):
+        u_t_x = []
+        
+        u_previous = U[-1]
+        
+        for m in range(1,len(x_grid)-1):
+            # Equation 5.14 (slightly modified) to calculate u at each x value:
+            #! - Note: can use classes or other methods to choose which function is used
+            u = invisic_burgers_1D_explicit(u_previous,m,dt,dx)
+            # Append this value to the time step line
+            u_t_x.append(u)
+
+        # Append the first and last value with boundary conditions (0 in this case)
+        u_t_x.insert(0,f_u_t_0(j*dt))
+        u_t_x.append(f_u_t_L(j*dt))
+
+        # Now append the full solutions matrix
+        U.append(u_t_x) 
+
+def heat_1D(f_u_t_0, f_u_t_L, f_u_0_x,L,t_max,dx,dt):    
+    # Create a stability check
+    if dt_5 > (dx_5**2 / (2*a_5)):
+        raise Exception(f"Entered dt is outside of stability range.  Please enter a smaller step size.\nNote: dt must </= {dx_5**2 / (2*a_5)}")
+
+    # -- Calculated
+    Nx_5 = int(L_5/dx_5) + 1
+    Nt_5 = int(t_max_5/dt_5)
+
+    x_grid_5 = np.linspace(0,L_5,Nx_5)
+    t_grid_5 = np.linspace(0,t_max_5,Nt_5)
+
+    # -- Create solution data holder
+    U_5 = []
+
+    # -- Append initial conditions (t = 0)
+    u_t_x_0 = []
+
+    for x in x_grid_5:
+        u_t_x_0.append(f_u_0_x(x))
+
+    u_t_x_0[0] = f_u_t_0(0)
+    u_t_x_0[-1] = f_u_t_L(0)
+
+    U_5.append(u_t_x_0)
+
+    for j in range(len(t_grid_5)):
+        u_t_x = []
+        
+        u_previous = U_5[-1]
+        
+        for m in range(1,len(x_grid_5)-1):
+            u = heat_1D_explicit(u_previous,a_5,m,dt,dx)
+            # Append this value to the time step line
+            u_t_x.append(u)
+
+        # Append the first and last value with boundary conditions (0 in this case)
+        u_t_x.insert(0,f_u_t_0(j*dt_5))
+        u_t_x.append(f_u_t_L(j*dt_5))
+
+        # Now append the full solutions matrix
+        U_5.append(u_t_x) 
+
+
+def PDE_plotter_1D(U, L, t_max, steps, t_min_plot, t_max_plot, x_min_plot, x_max_plot, style = 'multi'):
+    '''
+    Function takes in calculated 1D data changing over time
+    array of lists, the outer array holding timesteps and the inner a
+    '''    
+    dt = t_max/len(U)
+    t_min_index = int(t_min_plot / dt)
+    #*#t_max_index = int(t_max_plot / dt)
+    t_max_index = int(t_max_plot / dt) +1
+    print('t_min_index:',t_min_index)
+    print('t_max_index:',t_max_index)
+    
+    dx = L/len(U[0])
+    x_min_index = int(x_min_plot / dx)
+    x_max_index = int(x_max_plot / dx)
+    print('x_min_index:',x_min_index)
+    print('x_max_index:',x_max_index)
+
+    # Create slice to analyze
+    U_slice = U[t_min_index:t_max_index]
+    
+    fig, ax = plt.subplots(figsize=(10, 6))
+    ax.set_xlabel('x')  # Set x-axis label
+    ax.set_ylabel('T')  # Set y-axis label
+
+    # Set the y-axis limits
+    y_min = min([min(u) for u in U_slice]) - 0.5  # Find the minimum y-value in U with some buffer
+    y_max = max([max(u) for u in U_slice]) + 0.5  # Find the maximum y-value in U with some buffer
+    ax.set_ylim(y_min, y_max)
+
+    # Set the x-axis limits
+    ax.set_xlim(x_min_plot, x_max_plot)
+    
+    lines = []  # List to store line objects
+    alpha_decay = .7  # Factor to reduce the alpha of previous lines
+
+    plt.show()
+    
+    interval = len(U_slice)//steps
+
+    color_counter = 5
+   
+    for i in np.arange(0, len(U_slice), interval):
+        # Update the alpha values of existing lines
+        
+        for line in lines:
+            line.set_alpha(line.get_alpha() * alpha_decay)
+    
+        # Compute scaled x-axis values
+        x_values = np.linspace(0, L, len(U_slice[i]))
+        x_values_used = x_values[x_min_index:x_max_index+1]
+        
+        # Add new line
+        if style == 'heat':
+            line_color = 'red'
+        if style == 'multi':
+            line_color = ['cyan','green','yellow','magenta','blue'][color_counter%5]
+            color_counter += 1
+
+        print('i',i,'line_color:',line_color)
+
+        new_line, = ax.plot(x_values_used,U_slice[i][x_min_index:x_max_index+1], color=line_color, alpha=1.0)  # Start with full opacity
+        lines.append(new_line)  # Store the new line object
+        #ax.set_title(f"Plot at time = {i/(len(U_slice)-1)}s")  # Update the title with the current step
+        ax.set_title(f"Plot at time = {round(t_min_plot + i*dt,3)}s")
+        
+        
+        # Handling plot display
+        clear_output(wait=True)  # Clear the previous plot
+        display(fig)  # Display the current figure
+
+        time.sleep(0.25)  # Pause for half a second before the next update  
+
+
+##### -----------------------------------------------------------------------------------------------------------
+##### Finite difference Equations
+##### -----------------------------------------------------------------------------------------------------------
+def transport_1D_explicit(u_line,c,m,dt,dx):
+    '''
+    Takes in:
+    u_line - an 1D array
+    j - a time index
+    dt - time step
+    dx - x step
+    '''
+    return  c * (dt/(2*dx)) * (u_line[m-1] - u_line[m+1]) + u_line[m]
+
+def invisic_burgers_1D_explicit(u_line,m,dt,dx):
+    '''
+    Takes in
+    u_line - an 1D array
+    j - a time index
+    dt - time step
+    dx - x step
+    '''
+    return  u_line[m] * ((dt/(2*dx)) * (u_line[m-1] - u_line[m+1]) + 1)
+
+def heat_1D_explicit(u_line,a,m,dt,dx):
+    '''
+    Takes in
+    u_line - an 1D array
+    a - diffusion constant
+    m - a time index
+    dt - time step
+    dx - x step
+    '''
+    mu = a * (dt/dx**2) # Related to dt above, must be </= to .5
+    return  u_line[m] + mu*(u_line[m+1] + u_line[m-1] - 2*u_line[m])
+
+def wave_1D_explicit(u_line,u_line_previous,c,m,dt,dx):
+    '''
+    Takes in
+    u_line - an 1D array
+    u_line_previous - an 1D array
+    m - a time index
+    dt - time step
+    dx - x step
+    '''
+    return (dt**2/dx**2) * c**2 * (u_line[m+1] + u_line[m-1] - 2*u_line[m]) + 2*u_line[m] - u_line_previous[m]
+
+##### -----------------------------------------------------------------------------------------------------------
+##### ARCHIVED
+##### -----------------------------------------------------------------------------------------------------------
+
 def heat_1d_explicit(f_u_0_x, D, dx, L, f_u_t_0, f_u_t_L, t_max, dt_mod=1):
     '''
     This function takes in an initial temperature distribution, along with boundary conditions,
