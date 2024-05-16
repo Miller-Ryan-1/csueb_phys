@@ -134,7 +134,7 @@ def heat_1D(f_u_t_0, f_u_t_L, f_u_0_x,L,t_max,dx,dt):
         U_5.append(u_t_x) 
 
 
-def PDE_plotter_1D(U, L, t_max, steps, t_min_plot, t_max_plot, x_min_plot, x_max_plot, style = 'multi'):
+def PDE_plotter_1D(U, L, t_max, steps, t_min_plot, t_max_plot, x_min_plot, x_max_plot, style = 'multi', alpha_decay = .7):
     '''
     Function takes in calculated 1D data changing over time
     array of lists, the outer array holding timesteps and the inner a
@@ -168,7 +168,6 @@ def PDE_plotter_1D(U, L, t_max, steps, t_min_plot, t_max_plot, x_min_plot, x_max
     ax.set_xlim(x_min_plot, x_max_plot)
     
     lines = []  # List to store line objects
-    alpha_decay = .7  # Factor to reduce the alpha of previous lines
 
     plt.show()
     
@@ -193,9 +192,7 @@ def PDE_plotter_1D(U, L, t_max, steps, t_min_plot, t_max_plot, x_min_plot, x_max
             line_color = ['cyan','green','yellow','magenta','blue'][color_counter%5]
             color_counter += 1
 
-        print('i',i,'line_color:',line_color)
-
-        new_line, = ax.plot(x_values_used,U_slice[i][x_min_index:x_max_index+1], color=line_color, alpha=1.0)  # Start with full opacity
+        new_line, = ax.plot(x_values_used,U_slice[i][x_min_index:x_max_index+1], color=line_color, alpha=1)  # Start with full opacity
         lines.append(new_line)  # Store the new line object
         #ax.set_title(f"Plot at time = {i/(len(U_slice)-1)}s")  # Update the title with the current step
         ax.set_title(f"Plot at time = {round(t_min_plot + i*dt,3)}s")
