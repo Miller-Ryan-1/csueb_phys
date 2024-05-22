@@ -8,7 +8,53 @@ import matplotlib.pyplot as plt
 import time
 from IPython.display import display, clear_output
 
-def transport_1d(f_u_t_0, f_u_t_L, f_u_0_x,L,t_max,dx,dt,c):
+'''
+! - ToDo: Create Classes to Simplify!
+'''
+
+def transport_1d_explicit(f_u_t_0, f_u_t_L, f_u_0_x,L,t_max,dx,dt,c):
+    # -- Calculated
+    Nx = int(L/dx) + 1
+    Nt = int(t_max/dt)
+
+    x_grid = np.linspace(0,L,Nx)
+    t_grid = np.linspace(0,t_max,Nt)
+
+    # -- Create solution data holder
+    U = []
+
+    # -- Append initial conditions (t = 0)
+    u_t_x_0 = []
+
+    for x in x_grid:
+        u_t_x_0.append(f_u_0_x(x))
+
+    u_t_x_0[0] = f_u_t_0(0)
+    u_t_x_0[-1] = f_u_t_L(0)
+
+    U.append(u_t_x_0)
+
+    for j in range(len(t_grid)):
+        u_t_x = []
+        
+        u_previous = U[-1]
+        
+        for m in range(1,len(x_grid)-1):
+            u = transport_1D_explicit_timestep(u_previous,c,m,dt,dx)
+            # Append this value to the time step line
+            u_t_x.append(u)
+
+        # Append the first and last value with boundary conditions (0 in this case)
+        u_t_x.insert(0,f_u_t_0(j*dt))
+        u_t_x.append(f_u_t_L(j*dt))
+
+        # Now append the full solutions matrix
+        U.append(u_t_x) 
+
+    return U
+
+
+def inviscid_burgers_1D_explicit(f_u_t_0, f_u_t_L, f_u_0_x,L,t_max,dx,dt):
     # -- Calculated
     Nx = int(L/dx) + 1
     Nt = int(t_max/dt)
@@ -38,7 +84,7 @@ def transport_1d(f_u_t_0, f_u_t_L, f_u_0_x,L,t_max,dx,dt,c):
         for m in range(1,len(x_grid)-1):
             # Equation 5.14 (slightly modified) to calculate u at each x value:
             #! - Note: can use classes or other methods to choose which function is used
-            u = transport_1D_explicit(u_previous,c,m,dt,dx)
+            u = invisic_burgers_1D_explicit_timestep(u_previous,m,dt,dx)
             # Append this value to the time step line
             u_t_x.append(u)
 
@@ -49,96 +95,33 @@ def transport_1d(f_u_t_0, f_u_t_L, f_u_0_x,L,t_max,dx,dt,c):
         # Now append the full solutions matrix
         U.append(u_t_x) 
 
-def inviscid_burgers_1D(f_u_t_0, f_u_t_L, f_u_0_x,L,t_max,dx,dt):
-    # -- Calculated
-    Nx = int(L/dx) + 1
-    Nt = int(t_max/dt)
+    return U
 
-    x_grid = np.linspace(0,L,Nx)
-    t_grid = np.linspace(0,t_max,Nt)
 
-    # -- Create solution data holder
-    U = []
-
-    # -- Append initial conditions (t = 0)
-    u_t_x_0 = []
-
-    for x in x_grid:
-        u_t_x_0.append(f_u_0_x(x))
-
-    u_t_x_0[0] = f_u_t_0(0)
-    u_t_x_0[-1] = f_u_t_L(0)
-
-    U.append(u_t_x_0)
-
-    for j in range(len(t_grid)):
-        u_t_x = []
-        
-        u_previous = U[-1]
-        
-        for m in range(1,len(x_grid)-1):
-            # Equation 5.14 (slightly modified) to calculate u at each x value:
-            #! - Note: can use classes or other methods to choose which function is used
-            u = invisic_burgers_1D_explicit(u_previous,m,dt,dx)
-            # Append this value to the time step line
-            u_t_x.append(u)
-
-        # Append the first and last value with boundary conditions (0 in this case)
-        u_t_x.insert(0,f_u_t_0(j*dt))
-        u_t_x.append(f_u_t_L(j*dt))
-
-        # Now append the full solutions matrix
-        U.append(u_t_x) 
-
-def heat_1D(f_u_t_0, f_u_t_L, f_u_0_x,L,t_max,dx,dt):    
-    # Create a stability check
-    if dt_5 > (dx_5**2 / (2*a_5)):
-        raise Exception(f"Entered dt is outside of stability range.  Please enter a smaller step size.\nNote: dt must </= {dx_5**2 / (2*a_5)}")
-
-    # -- Calculated
-    Nx_5 = int(L_5/dx_5) + 1
-    Nt_5 = int(t_max_5/dt_5)
-
-    x_grid_5 = np.linspace(0,L_5,Nx_5)
-    t_grid_5 = np.linspace(0,t_max_5,Nt_5)
-
-    # -- Create solution data holder
-    U_5 = []
-
-    # -- Append initial conditions (t = 0)
-    u_t_x_0 = []
-
-    for x in x_grid_5:
-        u_t_x_0.append(f_u_0_x(x))
-
-    u_t_x_0[0] = f_u_t_0(0)
-    u_t_x_0[-1] = f_u_t_L(0)
-
-    U_5.append(u_t_x_0)
-
-    for j in range(len(t_grid_5)):
-        u_t_x = []
-        
-        u_previous = U_5[-1]
-        
-        for m in range(1,len(x_grid_5)-1):
-            u = heat_1D_explicit(u_previous,a_5,m,dt,dx)
-            # Append this value to the time step line
-            u_t_x.append(u)
-
-        # Append the first and last value with boundary conditions (0 in this case)
-        u_t_x.insert(0,f_u_t_0(j*dt_5))
-        u_t_x.append(f_u_t_L(j*dt_5))
-
-        # Now append the full solutions matrix
-        U_5.append(u_t_x) 
+def heat_1D_explcit():
+    return U
 
 
 def PDE_plotter_1D(U, L, t_max, steps, t_min_plot, t_max_plot, x_min_plot, x_max_plot, style = 'multi', alpha_decay = .7):
     '''
     Function takes in calculated 1D data changing over time
     array of lists, the outer array holding timesteps and the inner a
-    '''    
+    '''
+    # Check for Errors
+    if t_max_plot > t_max:
+        raise Exception('Plotting end time exceeds maximum time')
+    if t_min_plot < 0:
+        raise Exception('Plotting start time must be greater than 0')
+    if t_min_plot >= t_max_plot:
+        raise Exception('Max plot time greater than minimum plot time')
+    if x_min_plot < 0:
+        raise Exception('Minimum x plot less than left boundary')
+    if x_max_plot > L:
+        raise Exception('Mamimum x plot larger than the right boundary')
+    if x_min_plot >= x_max_plot:
+        raise Exception('Invalid x value plotting range')
+    
+
     dt = t_max/len(U)
     t_min_index = int(t_min_plot / dt)
     #*#t_max_index = int(t_max_plot / dt)
@@ -205,10 +188,11 @@ def PDE_plotter_1D(U, L, t_max, steps, t_min_plot, t_max_plot, x_min_plot, x_max
         time.sleep(0.25)  # Pause for half a second before the next update  
 
 
+
 ##### -----------------------------------------------------------------------------------------------------------
-##### Finite difference Equations
+##### Finite Difference Equations (Explicit)
 ##### -----------------------------------------------------------------------------------------------------------
-def transport_1D_explicit(u_line,c,m,dt,dx):
+def transport_1D_explicit_timestep(u_line,c,m,dt,dx):
     '''
     Takes in:
     u_line - an 1D array
@@ -218,7 +202,7 @@ def transport_1D_explicit(u_line,c,m,dt,dx):
     '''
     return  c * (dt/(2*dx)) * (u_line[m-1] - u_line[m+1]) + u_line[m]
 
-def invisic_burgers_1D_explicit(u_line,m,dt,dx):
+def invisic_burgers_1D_explicit_timestep(u_line,m,dt,dx):
     '''
     Takes in
     u_line - an 1D array
@@ -228,7 +212,7 @@ def invisic_burgers_1D_explicit(u_line,m,dt,dx):
     '''
     return  u_line[m] * ((dt/(2*dx)) * (u_line[m-1] - u_line[m+1]) + 1)
 
-def heat_1D_explicit(u_line,a,m,dt,dx):
+def heat_1D_explicit_timestep(u_line,a,m,dt,dx):
     '''
     Takes in
     u_line - an 1D array
@@ -240,7 +224,7 @@ def heat_1D_explicit(u_line,a,m,dt,dx):
     mu = a * (dt/dx**2) # Related to dt above, must be </= to .5
     return  u_line[m] + mu*(u_line[m+1] + u_line[m-1] - 2*u_line[m])
 
-def wave_1D_explicit(u_line,u_line_previous,c,m,dt,dx):
+def wave_1D_explicit_timestep(u_line,u_line_previous,c,m,dt,dx):
     '''
     Takes in
     u_line - an 1D array
@@ -250,6 +234,8 @@ def wave_1D_explicit(u_line,u_line_previous,c,m,dt,dx):
     dx - x step
     '''
     return (dt**2/dx**2) * c**2 * (u_line[m+1] + u_line[m-1] - 2*u_line[m]) + 2*u_line[m] - u_line_previous[m]
+
+
 
 ##### -----------------------------------------------------------------------------------------------------------
 ##### ARCHIVED
@@ -394,7 +380,7 @@ def heat_1d_implicit(f_u_0_x, D, dx, dt, L, f_u_t_0, f_u_t_L, t_max):
     return T
 
 
-def crank_nicholson_1d(f_u_0_x, D, dx, dt, L, f_u_t_0, f_u_t_L, t_max):
+def heat_crank_nicholson_1d(f_u_0_x, D, dx, dt, L, f_u_t_0, f_u_t_L, t_max):
     # Number of dx nodes, including 0 node
     Nx = int(L/dx) + 1
 
