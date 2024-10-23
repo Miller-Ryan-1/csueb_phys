@@ -1,4 +1,6 @@
-## CSUEB Spring 2024
+## CSUEB Spring 2024 - Spring 2025
+
+This Repository contains a number of notebooks and code in support of scholastic projects and problems during my time at CSU East Bay.
 
 ### Folder Directory
 1. GR - General Relativity and PDE Numerical Methods Research ('numerical_pdes' folder).
@@ -9,4 +11,4 @@
 6. phys481 - Notebooks supporting work in Phys481 - Advanced Lab IV.
 7. spitzer - Presentation, Notebook and files related to Spitzer Presentation.
 
-> working_notebook.ipynb - Workbook containing code snippets and problems currently working on (to eventually be put into a notebook and eventually their own directories/files).
+> + working_notebook.ipynb - Workbook containing code snippets and problems currently working on (to eventually be put into a notebook and eventually their own directories/files).
